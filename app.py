@@ -294,6 +294,7 @@ else:
     fab = int(d["Fabricadas"])
     buenas = int(d["Buenas"])
     retenidas = int(d["Retenidas"])
+    total_fab = fab
     eficiencia = (buenas / fab * 100) if fab > 0 else 0
     total_def = int(d["Def_Cuello"]) + int(d["Def_Rotura"]) + int(d["Def_BajoMin"])
 
