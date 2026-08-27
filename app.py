@@ -67,7 +67,6 @@ def extraer_datos_pdf(archivo_subido):
 
         observaciones_limpias = [obs.replace('[cite: 1]', '').strip() for obs in observaciones]
 
-        # Valores dinámicos según el tipo de línea detectada en la prueba
         if "E2" in linea:
             fab, bue, ret, dc, dr, db = 3500, 3320, 180, 22, 5, 35
         elif "B4" in linea:
@@ -124,7 +123,7 @@ st.markdown("""
 # --- ESTADO DE SESIÓN ---
 if 'datos_activos' not in st.session_state:
     st.session_state.datos_activos = {
-       "Linea": "Sin Línea Asignada",
+        "Linea": "Sin Línea Asignada",
         "Molde": "---",
         "Item": "---",
         "Fabricadas": 0,
@@ -198,63 +197,6 @@ with st.sidebar:
             st.success("Base de datos restablecida.")
             st.rerun()
 
-# --- CUERPO PRINCIPAL ---
-d = st.session_state.datos_activos
-st.title(f"🔬 Dashboard Metrológico — {d['Linea']}")
-# Definimos las variables base globalmente para que existan en cualquier vista
-fab = int(d.get("Fabricadas", 0))
-buenas = int(d.get("Buenas", 0))
-retenidas = int(d.get("Retenidas", 0))
-total_fab = fab  # <--- Aquí queda definida siempre de forma segura
-eficiencia = (buenas / fab * 100) if fab > 0 else 0
-total_def = int(d.get("Def_Cuello", 0)) + int(d.get("Def_Rotura", 0)) + int(d.get("Def_BajoMin", 0))
-st.markdown(f"**Ítem:** `{d['Item']}` &nbsp;|&nbsp; **Molde Activo:** `{d['Molde']}`")
-st.markdown("")
-
-# --- CÁLCULOS CLAVE & MÓDULO SPC (LÍMITES DE CONTROL) ---
-fab = int(d["Fabricadas"])
-buenas = int(d["Buenas"])
-retenidas = int(d["Retenidas"])
-eficiencia = (buenas / fab * 100) if fab > 0 else 0
-total_def = int(d["Def_Cuello"]) + int(d["Def_Rotura"]) + int(d["Def_BajoMin"])
-
-# Evaluación de límites SPC (Ej: Alerta si la eficiencia es menor al 92% o defectos > 40)
-st.markdown("### 📋 Panel de Incidencias y Alertas SPC")
-with st.container(border=True):
-    # Alertas automáticas por SPC
-    if eficiencia < 92.0:
-        st.markdown(f"🚨 **[SPC ALERTA CRÍTICA]**: Eficiencia actual ({eficiencia:.2f}%) por debajo del límite mínimo aceptable del 92.0%.")
-    else:
-        st.markdown(f"✅ **[SPC ESTABLE]**: Eficiencia de línea ({eficiencia:.2f}%) dentro del parámetro de control.")
-        
-    if total_def > 35:
-        st.markdown(f"⚠️ **[SPC ADVERTENCIA]**: Conteo alto de defectos ({total_def} unidades). Se sugiere revisión en caliente.")
-
-    notas = d.get("Notas_Alerta", [])
-    if isinstance(notas, list):
-        for nota in notas:
-            st.markdown(f"⚠️ {nota}")
-    else:
-        st.markdown(f"⚠️ {notas}")
-
-st.markdown("")
-
-# --- FILA DE TARJETAS DE MÉTRICAS ---
-col1, col2, col3, col4, col5 = st.columns(5)
-with col1:
-    st.markdown(f'<div class="metric-container"><div class="metric-label">Fabricadas</div><div class="metric-val">{fab:,}</div></div>', unsafe_allow_html=True)
-with col2:
-    st.markdown(f'<div class="metric-container"><div class="metric-label">Paletas Buenas</div><div class="metric-val" style="color: #34d399;">{buenas:,}</div></div>', unsafe_allow_html=True)
-with col3:
-    st.markdown(f'<div class="metric-container"><div class="metric-label">Paletas Retenidas</div><div class="metric-val" style="color: #f87171;">{retenidas:,}</div></div>', unsafe_allow_html=True)
-with col4:
-    color_eff = "#34d399" if eficiencia >= 92.0 else "#f87171"
-    st.markdown(f'<div class="metric-container"><div class="metric-label">Eficiencia (SPC)</div><div class="metric-val" style="color: {color_eff};">{eficiencia:.2f}%</div></div>', unsafe_allow_html=True)
-with col5:
-    st.markdown(f'<div class="metric-container"><div class="metric-label">Total Defectos</div><div class="metric-val" style="color: #fbbf24;">{total_def}</div></div>', unsafe_allow_html=True)
-
-st.markdown("---")
-
 # --- NAVEGACIÓN PRINCIPAL SEGÚN LA BARRA LATERAL ---
 if seccion == "📈 Tendencias SPC y Multilínea":
     st.title("📈 Análisis de Tendencias Históricas y Comparativa Multilínea")
@@ -288,7 +230,7 @@ if seccion == "📈 Tendencias SPC y Multilínea":
             )
             st.plotly_chart(fig_multi, use_container_width=True)
     else:
-        st.info("⚠️ Aún no hay suficientes registros guardados en la base de datos para mostrar tendencias. Guarde algunos reportes primero desde la pestaña **⚙️ Ajustar y Guardar Oficialmente** (en la otra vista).")
+        st.info("⚠️ Aún no hay suficientes registros guardados en la base de datos para mostrar tendencias. Guarde algunos reportes primero cargando un PDF.")
 
 else:
     # --- CUERPO PRINCIPAL DEL DASHBOARD DE TURNO ---
@@ -306,26 +248,24 @@ else:
     total_def = int(d["Def_Cuello"]) + int(d["Def_Rotura"]) + int(d["Def_BajoMin"])
 
     st.markdown("### 📋 Panel de Incidencias y Alertas SPC")
-with st.container(border=True):
-    # Verificamos si el sistema está en ceros / sin datos cargados
-    if total_fab == 0:
-        st.markdown("ℹ️ **[SISTEMA EN ESPERA]**: Cargue un reporte PDF en la barra lateral para iniciar el monitoreo SPC.")
-    else:
-        # Evaluación normal cuando ya hay datos
-        if eficiencia < 92.0:
-            st.markdown(f"🚨 **[SPC ALERTA CRÍTICA]**: Eficiencia actual ({eficiencia:.2f}%) por debajo del límite mínimo aceptable del 92.0%.")
+    with st.container(border=True):
+        if total_fab == 0:
+            st.markdown("ℹ️ **[SISTEMA EN ESPERA]**: Cargue un reporte PDF en la barra lateral para iniciar el monitoreo SPC.")
         else:
-            st.markdown(f"✅ **[SPC ESTABLE]**: Eficiencia de línea ({eficiencia:.2f}%) dentro del parámetro de control.")
-        
-        # Validación de defectos (solo si hay producción)
-        if total_def > 35:
-            st.markdown(f"⚠️ **[SPC ADVERTENCIA]**: Conteo alto de defectos ({total_def} unidades). Se sugiere revisión en caliente.")
-        notas = d.get("Notas_Alerta", [])
-        if isinstance(notas, list):
-            for nota in notas:
-                st.markdown(f"⚠️ {nota}")
-        else:
-            st.markdown(f"⚠️ {notas}")
+            if eficiencia < 92.0:
+                st.markdown(f"🚨 **[SPC ALERTA CRÍTICA]**: Eficiencia actual ({eficiencia:.2f}%) por debajo del límite mínimo aceptable del 92.0%.")
+            else:
+                st.markdown(f"✅ **[SPC ESTABLE]**: Eficiencia de línea ({eficiencia:.2f}%) dentro del parámetro de control.")
+            
+            if total_def > 35:
+                st.markdown(f"⚠️ **[SPC ADVERTENCIA]**: Conteo alto de defectos ({total_def} unidades). Se sugiere revisión en caliente.")
+            
+            notas = d.get("Notas_Alerta", [])
+            if isinstance(notas, list):
+                for nota in notas:
+                    st.markdown(f"⚠️ {nota}")
+            else:
+                st.markdown(f"⚠️ {notas}")
 
     st.markdown("")
 
