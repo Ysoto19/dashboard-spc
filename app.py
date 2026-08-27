@@ -124,16 +124,16 @@ st.markdown("""
 # --- ESTADO DE SESIÓN ---
 if 'datos_activos' not in st.session_state:
     st.session_state.datos_activos = {
-        "Linea": "Línea F1",
-        "Molde": "Ev-2148",
-        "Item": "V-0003986",
-        "Fabricadas": 3900,
-        "Buenas": 3850,
-        "Retenidas": 50,
-        "Def_Cuello": 8,
-        "Def_Rotura": 12,
-        "Def_BajoMin": 15,
-        "Notas_Alerta": ["Cargue un archivo PDF para extraer las incidencias del turno."]
+       "Linea": "Sin Línea Asignada",
+        "Molde": "---",
+        "Item": "---",
+        "Fabricadas": 0,
+        "Buenas": 0,
+        "Retenidas": 0,
+        "Def_Cuello": 0,
+        "Def_Rotura": 0,
+        "Def_BajoMin": 0,
+        "Notas_Alerta": ["⚠️ Por favor, cargue un reporte PDF en la barra lateral para iniciar el análisis."]
     }
 
 # --- BARRA LATERAL ---
