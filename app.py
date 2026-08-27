@@ -298,15 +298,20 @@ else:
     total_def = int(d["Def_Cuello"]) + int(d["Def_Rotura"]) + int(d["Def_BajoMin"])
 
     st.markdown("### 📋 Panel de Incidencias y Alertas SPC")
-    with st.container(border=True):
+with st.container(border=True):
+    # Verificamos si el sistema está en ceros / sin datos cargados
+    if total_fab == 0:
+        st.markdown("ℹ️ **[SISTEMA EN ESPERA]**: Cargue un reporte PDF en la barra lateral para iniciar el monitoreo SPC.")
+    else:
+        # Evaluación normal cuando ya hay datos
         if eficiencia < 92.0:
             st.markdown(f"🚨 **[SPC ALERTA CRÍTICA]**: Eficiencia actual ({eficiencia:.2f}%) por debajo del límite mínimo aceptable del 92.0%.")
         else:
             st.markdown(f"✅ **[SPC ESTABLE]**: Eficiencia de línea ({eficiencia:.2f}%) dentro del parámetro de control.")
-            
+        
+        # Validación de defectos (solo si hay producción)
         if total_def > 35:
             st.markdown(f"⚠️ **[SPC ADVERTENCIA]**: Conteo alto de defectos ({total_def} unidades). Se sugiere revisión en caliente.")
-
         notas = d.get("Notas_Alerta", [])
         if isinstance(notas, list):
             for nota in notas:
