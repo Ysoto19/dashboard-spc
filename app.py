@@ -51,9 +51,9 @@ def extraer_datos_pdf(archivo_subido):
             match = re.search(patron, texto, re.IGNORECASE)
             return match.group(1).strip() if match else defecto
 
-        linea = buscar(r"(?:Maquina|Máquina)[:\s]*([A-Za-z0-9_-]+)", texto_completo, "F1")
-        molde = buscar(r"Molde[:\s]*([A-Za-z0-9_-]+)", texto_completo, "Ev-2148")
-        item = buscar(r"(?:Item Number|Ítem)[:\s]*([A-Za-z0-9_-]+)", texto_completo, "V-0003986")
+        linea = buscar(r"(?:Maquina|Máquina)[:\s]*([A-Za-z0-9_-]+)", texto_completo, "---")
+        molde = buscar(r"Molde[:\s]*([A-Za-z0-9_-]+)", texto_completo, "---")
+        item = buscar(r"(?:Item Number|Ítem)[:\s]*([A-Za-z0-9_-]+)", texto_completo, "----")
         
         observaciones = []
         if "Fallas presentadas" in texto_completo:
@@ -201,6 +201,13 @@ with st.sidebar:
 # --- CUERPO PRINCIPAL ---
 d = st.session_state.datos_activos
 st.title(f"🔬 Dashboard Metrológico — {d['Linea']}")
+# Definimos las variables base globalmente para que existan en cualquier vista
+fab = int(d.get("Fabricadas", 0))
+buenas = int(d.get("Buenas", 0))
+retenidas = int(d.get("Retenidas", 0))
+total_fab = fab  # <--- Aquí queda definida siempre de forma segura
+eficiencia = (buenas / fab * 100) if fab > 0 else 0
+total_def = int(d.get("Def_Cuello", 0)) + int(d.get("Def_Rotura", 0)) + int(d.get("Def_BajoMin", 0))
 st.markdown(f"**Ítem:** `{d['Item']}` &nbsp;|&nbsp; **Molde Activo:** `{d['Molde']}`")
 st.markdown("")
 
